@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<testsuites disabled="0" errors="0" failures="12" tests="12" time="1.2375099658966064" name="SST TESTING FRAMEWORKS">
+	<testsuite disabled="0" errors="0" failures="12" name="testsuite_default_SubComponent" skipped="0" tests="12" time="1.2375099658966064">
+		<testcase name="test_SubComponent_sc_2a" time="0.098475" timestamp="2024_0402_02:52:57.573223 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_2a.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_2a.out "/>
+		</testcase>
+		<testcase name="test_SubComponent_sc_2u" time="0.109202" timestamp="2024_0402_02:52:57.671773 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_2u.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_2u.out "/>
+		</testcase>
+		<testcase name="test_SubComponent_sc_2u2a" time="0.100939" timestamp="2024_0402_02:52:57.781056 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_2u2a.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_2u2a.out "/>
+		</testcase>
+		<testcase name="test_SubComponent_sc_2u2u" time="0.099253" timestamp="2024_0402_02:52:57.882077 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_2u2u.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_2u2u.out "/>
+		</testcase>
+		<testcase name="test_SubComponent_sc_2ua" time="0.110187" timestamp="2024_0402_02:52:57.981420 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_2ua.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_2ua.out "/>
+		</testcase>
+		<testcase name="test_SubComponent_sc_2uu" time="0.100324" timestamp="2024_0402_02:52:58.091683 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_2uu.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_2uu.out "/>
+		</testcase>
+		<testcase name="test_SubComponent_sc_a" time="0.098872" timestamp="2024_0402_02:52:58.192127 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_a.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_a.out "/>
+		</testcase>
+		<testcase name="test_SubComponent_sc_u" time="0.110080" timestamp="2024_0402_02:52:58.291107 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_u.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_u.out "/>
+		</testcase>
+		<testcase name="test_SubComponent_sc_u2a" time="0.110279" timestamp="2024_0402_02:52:58.401277 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_u2a.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_u2a.out "/>
+		</testcase>
+		<testcase name="test_SubComponent_sc_u2u" time="0.099724" timestamp="2024_0402_02:52:58.511633 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_u2u.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_u2u.out "/>
+		</testcase>
+		<testcase name="test_SubComponent_sc_ua" time="0.099779" timestamp="2024_0402_02:52:58.611445 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_ua.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_ua.out "/>
+		</testcase>
+		<testcase name="test_SubComponent_sc_uu" time="0.100397" timestamp="2024_0402_02:52:58.711303 utc" classname="testcase_SubComponent">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_SubComponent_sc_uu.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/subcomponent_tests/refFiles/test_sc_uu.out "/>
+		</testcase>
+	</testsuite>
+</testsuites>

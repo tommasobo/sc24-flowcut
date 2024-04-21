@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<testsuites disabled="0" errors="0" failures="1" tests="1" time="4.240891218185425" name="SST TESTING FRAMEWORKS">
+	<testsuite disabled="0" errors="0" failures="1" name="testsuite_default_Component" skipped="0" tests="1" time="4.240891218185425">
+		<testcase name="test_Component" time="4.240891" timestamp="2024_0402_02:52:49.450597 utc" classname="testcase_Component">
+			<failure type="failure" message="AssertionError: False is not true : Output/Compare file /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sst-elements-library-11.0.0/sst_test_outputs/run_data/test_Component.out does not match Reference File /home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/refFiles/test_Component.out "/>
+		</testcase>
+	</testsuite>
+</testsuites>

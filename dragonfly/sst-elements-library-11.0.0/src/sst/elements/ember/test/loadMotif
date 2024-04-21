@@ -1,0 +1,6 @@
+#ALLPINGPONGISMPLE
+[JOB_ID] 10
+[NID_LIST] 0,1,2,3,4,5,6,7
+[MOTIF] Init
+[MOTIF] AllPingPong messageSize=900
+[MOTIF] Fini

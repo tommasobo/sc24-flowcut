@@ -1,0 +1,5 @@
+[JOB_ID] 10
+[NID_LIST] generateNidList=generateNidListRange(0,1024)
+[MOTIF] Init
+[MOTIF] Scatter messageSize=655360
+[MOTIF] Fini

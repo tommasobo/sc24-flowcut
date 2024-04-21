@@ -1,0 +1,7 @@
+#ALLPINGPONGISMPLE
+[JOB_ID] 10
+[NID_LIST] 0,1,2,3
+[MOTIF] Init
+[MOTIF] Scatter load_delay=0.7
+[MOTIF] Fini
+

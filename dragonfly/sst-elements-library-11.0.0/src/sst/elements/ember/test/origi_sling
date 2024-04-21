@@ -1,0 +1,16 @@
+EMBER: using param directory: paramFiles
+EMBER: platform: default
+Param 16:16:16:4
+alpha is 0.5
+ratio is 4
+EMBER: network: topology=dragonfly shape=16:16:16:4 routing=slingshot defaultRouting=ugal
+EMBER: numNodes=1024 numNics=1024
+override nicParams module=merlin.linkcontrol with merlin.reorderlinkcontrol
+Nic BW 200Gb/s
+Merlin BW 200Gb/s
+EMBER: network: BW=200Gb/s pktSize=2048B flitSize=64B
+EMBER: Job=10, nidList='0,1,2,3,4,5,6,7'
+EMBER: Motif='Init'
+EMBER: Motif='AllPingPong messageSize=900'
+EMBER: Motif='Fini'
+Please enter nic_link_bw: 

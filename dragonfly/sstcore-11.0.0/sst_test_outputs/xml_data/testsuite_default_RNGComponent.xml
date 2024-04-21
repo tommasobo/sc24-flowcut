@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<testsuites disabled="0" errors="3" failures="0" tests="3" time="0.6664323806762695" name="SST TESTING FRAMEWORKS">
+	<testsuite disabled="0" errors="3" failures="0" name="testsuite_default_RNGComponent" skipped="0" tests="3" time="0.6664323806762695">
+		<testcase name="test_RNG_Marsaglia" time="0.221539" timestamp="2024_0401_01:46:01.758676 utc" classname="testcase_RNGComponent">
+			<error type="error" message="FileNotFoundError: [Errno 2] No such file or directory: '/home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/refFiles/test_RNGComponent_marsaglia.out' "/>
+		</testcase>
+		<testcase name="test_RNG_Mersenne" time="0.226215" timestamp="2024_0401_01:46:01.980312 utc" classname="testcase_RNGComponent">
+			<error type="error" message="FileNotFoundError: [Errno 2] No such file or directory: '/home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/refFiles/test_RNGComponent_mersenne.out' "/>
+		</testcase>
+		<testcase name="test_RNG_xorshift" time="0.218678" timestamp="2024_0401_01:46:02.206627 utc" classname="testcase_RNGComponent">
+			<error type="error" message="FileNotFoundError: [Errno 2] No such file or directory: '/home/tbonato/SC24/analysis-of-the-adaptive-routing-algorithm-in-the-slingshot-interconnect/sstcore-11.0.0/tests/refFiles/test_RNGComponent_xorshift.out' "/>
+		</testcase>
+	</testsuite>
+</testsuites>
