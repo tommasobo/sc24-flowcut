@@ -114,6 +114,6 @@ file_name = "permutation_failure_normal_heat"
 #file_name = "heatmap_web"
 file_name = "heatmap_permutation"
 file_name = "heatmap_web"
-plt.savefig(Path("plots/png") / (str("heatmap") + file_name))
-plt.savefig(Path("plots/pdf") / (str("heatmap") + file_name + ".pdf"))
+plt.savefig(Path("plots/png") / (str("heatmap2") + file_name))
+plt.savefig(Path("plots/pdf") / (str("heatmap2") + file_name + ".pdf"))
 #plt.show()

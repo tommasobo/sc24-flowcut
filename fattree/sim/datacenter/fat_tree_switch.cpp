@@ -22,11 +22,17 @@ FatTreeSwitch::FatTreeSwitch(EventList &eventlist, string s, switch_type t, uint
     _fib = new RouteTable();
 }
 
+
+
 void FatTreeSwitch::receivePacket(Packet &pkt) {
+
+
+    printf("I AM HERE - FatTreeSwitch::receivePacket\n");
 
     if (pkt.is_bts_pkt) {
         printf("BTS Packet 2\n");
     }
+
 
     if (pkt.type() == ETH_PAUSE) {
         EthPausePacket *p = (EthPausePacket *)&pkt;

@@ -143,6 +143,7 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[i], "-rtt_ratio")) {
             double rtt_ratio = std::stod(argv[i + 1]);
             NdpSrc::set_flowcut_rtt_ratio(rtt_ratio);
+            FatTreeInterDCSwitch::flowcut_ratio = rtt_ratio;
             i++;
         } else if (!strcmp(argv[i], "-rtt_ratio")) {
             double rtt_ratio = std::stod(argv[i + 1]);
@@ -213,6 +214,9 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[i], "-mtu")) {
             packet_size = atoi(argv[i + 1]);
             PKT_SIZE_MODERN = packet_size; // Saving this for UEC reference, Bytes
+            i++;
+        } else if (!strcmp(argv[i], "-flowcut_mode")) {
+            NdpSrc::flowcut_mode = atoi(argv[i + 1]);
             i++;
         } else if (!strcmp(argv[i], "-switch_latency")) {
             switch_latency = timeFromNs(atof(argv[i + 1]));

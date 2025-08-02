@@ -100,11 +100,16 @@ def run_experiment(experiment_name, experiment_cm, topo_name, name_title, msg_si
     os.system("rm -rf experiments/{}".format(experiment_name))
     os.system("mkdir experiments/{}".format(experiment_name))
 
+
+    out_name = "experiments/{}/out.txt".format(experiment_name)
+    string_to_run = "../sim/datacenter/htsim_ndp_entry_modern -topo ../sim/datacenter/topologies/{} -o uec_entry -k 1 -nodes 128 -q 4452000 -strat ecmp_host_random_ecn -linkspeed 200000 -mtu 4096 -seed 15 -hop_latency 1000 -switch_latency 0 -os_border 1 -tm ../sim/datacenter/connection_matrices/{} -collect_data 0 -topology interdc -max_queue_size {} -interdc_delay 500000 -routing_sc flowcut -rtt_ratio 4 -cwnd 2500000 > {}".format(topo_name, experiment_cm, custom_queue_size, out_name)
+    print(string_to_run)
+
     # PhantomCC
     out_name = "experiments/{}/out.txt".format(experiment_name)
     string_to_run = "../sim/datacenter/htsim_ndp_entry_modern -topo ../sim/datacenter/topologies/{} -o uec_entry -k 1 -nodes 128 -q 4452000 -strat ecmp_host_random_ecn -linkspeed 200000 -mtu 4096 -seed 15 -hop_latency 1000 -switch_latency 0 -os_border 1 -tm ../sim/datacenter/connection_matrices/{} -collect_data 0 -topology interdc -max_queue_size {} -interdc_delay 500000 -routing_sc random -cwnd 2500000 > {}".format(topo_name, experiment_cm, custom_queue_size, out_name)
     print(string_to_run)
-    os.system(string_to_run)
+    #os.system(string_to_run)
     
     list_phantombts = getListFCT(out_name)
     list_phantombts_small = getListFCT(out_name, min_size=0, max_size=100000)
@@ -122,7 +127,7 @@ def run_experiment(experiment_name, experiment_cm, topo_name, name_title, msg_si
     string_to_run = "../sim/datacenter/htsim_ndp_entry_modern -topo ../sim/datacenter/topologies/{} -o uec_entry -k 1 -nodes 128 -q 4452000 -strat ecmp_host_random_ecn -linkspeed 200000 -mtu 4096 -seed 15 -hop_latency 1000 -switch_latency 0 -os_border 1 -tm ../sim/datacenter/connection_matrices/{} -collect_data 0 -topology interdc -max_queue_size {} -interdc_delay 500000 -routing_sc ecmp -cwnd 2500000 > {}".format(topo_name, experiment_cm, custom_queue_size, out_name)
 
     print(string_to_run)
-    os.system(string_to_run)
+    #os.system(string_to_run)
     print("ECMP Completion Time {}\n".format(getCompletionTime(out_name)))
     list_phantom = getListFCT(out_name)
     list_phantom_small = getListFCT(out_name, min_size=0, max_size=100000)
@@ -135,7 +140,7 @@ def run_experiment(experiment_name, experiment_cm, topo_name, name_title, msg_si
     # MPRDMA
     out_name = "experiments/{}/out.txt".format(experiment_name)
     string_to_run = "../sim/datacenter/htsim_ndp_entry_modern -topo ../sim/datacenter/topologies/{} -o uec_entry -k 1 -nodes 128 -q 4452000 -strat ecmp_host_random_ecn -linkspeed 200000 -mtu 4096 -seed 15 -hop_latency 1000 -switch_latency 0 -os_border 1 -tm ../sim/datacenter/connection_matrices/{} -collect_data 0 -topology interdc -max_queue_size {} -interdc_delay 500000 -routing_sc flowlet -flowlet_value 1590000 -cwnd 2500000 > {}".format(topo_name, experiment_cm, custom_queue_size, out_name)
-    os.system(string_to_run)
+    #os.system(string_to_run)
     print(string_to_run)
     list_smartt2 = getListFCT(out_name)
     
@@ -150,7 +155,7 @@ def run_experiment(experiment_name, experiment_cm, topo_name, name_title, msg_si
     # MPRDMA2
     out_name = "experiments/{}/out.txt".format(experiment_name)
     string_to_run = "../sim/datacenter/htsim_ndp_entry_modern -topo ../sim/datacenter/topologies/{} -o uec_entry -k 1 -nodes 128 -q 4452000 -strat ecmp_host_random_ecn -linkspeed 200000 -mtu 4096 -seed 15 -hop_latency 1000 -switch_latency 0 -os_border 1 -tm ../sim/datacenter/connection_matrices/{} -collect_data 0 -topology interdc -max_queue_size {} -interdc_delay 500000 -routing_sc flowlet -flowlet_value 82080000 -cwnd 2500000 > {}".format(topo_name, experiment_cm, custom_queue_size, out_name)
-    os.system(string_to_run)
+    #os.system(string_to_run)
     print(string_to_run)
     print("Flowlet2 Completion Time {}\n".format(getCompletionTime(out_name)))
     list_bbr = getListFCT(out_name)
@@ -163,7 +168,7 @@ def run_experiment(experiment_name, experiment_cm, topo_name, name_title, msg_si
     # Flowlet Balanced
     out_name = "experiments/{}/out.txt".format(experiment_name)
     string_to_run = "../sim/datacenter/htsim_ndp_entry_modern -topo ../sim/datacenter/topologies/{} -o uec_entry -k 1 -nodes 128 -q 4452000 -strat ecmp_host_random_ecn -linkspeed 200000 -mtu 4096 -seed 15 -hop_latency 1000 -switch_latency 0 -os_border 1 -tm ../sim/datacenter/connection_matrices/{} -collect_data 0 -topology interdc -max_queue_size {} -interdc_delay 500000 -routing_sc flowlet -flowlet_value 42080000 -cwnd 2500000 > {}".format(topo_name, experiment_cm, custom_queue_size, out_name)
-    os.system(string_to_run)
+    #os.system(string_to_run)
     print(string_to_run)
     list_balanced = getListFCT(out_name)
     list_balanced_small = getListFCT(out_name, min_size=0, max_size=100000)

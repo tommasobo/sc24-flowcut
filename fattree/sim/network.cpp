@@ -53,6 +53,8 @@ PacketSink *Packet::sendOn() {
     // printf("Send on Hrere - %d %d\n", size(), is_bts_pkt);
 
     if (_route) {
+        //printf("Next Routed1, %d\n", size());
+        //printf("Next RoutedHop1 %s\n", nextsink->nodename().c_str());
         /* printf("Next Hop %s - Switch ID\n", _route->at(_nexthop)->nodename().c_str()); */
         if (_bounced) {
             /*printf("ID %d - From %d - Route Size is %d - Hops %d - Size %d - "
@@ -76,12 +78,14 @@ PacketSink *Packet::sendOn() {
 
             nextsink = _route->at(_nexthop);
             _nexthop++;
+            //printf("Next Hop %s - Switch ID %s\n", nextsink->nodename().c_str(), nextsink->nodename().c_str());
 
             /*printf("ID %d - Hop %d - %s\n", id(), _nexthop,
                    nextsink->nodename().c_str());*/
         }
     } else if (_next_routed_hop) {
-        printf("Next RoutedHop %s\n", _next_routed_hop->nodename().c_str());
+        //printf("Next Routed2\n");
+        //printf("Next RoutedHop2 %s\n", _next_routed_hop->nodename().c_str());
         nextsink = _next_routed_hop;
         // printf("Test\n");
     } else {

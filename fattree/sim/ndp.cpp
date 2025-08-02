@@ -48,6 +48,7 @@ simtime_picosec NdpSrc::_min_rto = timeFromUs((uint32_t)DEFAULT_RTO_MIN);
 // running - this is deliberate!
 RouteStrategy NdpSrc::_route_strategy = NOT_SET;
 RouteStrategy NdpSink::_route_strategy = NOT_SET;
+int NdpSrc::flowcut_mode = 0; // 0 = nic, 1 = ingress, 2 = all
 
 // _path_entropy_size is the number of paths we spray across.  If you don't set
 // it, it will default to all paths.
@@ -122,7 +123,7 @@ NdpSrc::NdpSrc(NdpLogger *logger, TrafficLogger *pktlogger, EventList &eventlist
 // Add deconstructor and save data once we are done.
 NdpSrc::~NdpSrc() {
     // If we are collecting specific logs
-    printf("Total Time Spend Draining %d %lu of %lu\n", from, total_drain_time / 1000, GLOBAL_TIME / 1000);
+    
 
     if (COLLECT_DATA) {
         // RTT
@@ -315,6 +316,7 @@ void NdpSrc::set_paths(vector<const Route *> *rt_list) {
 void NdpSrc::startflow() {
     cout << "startflow " << _flow._name << " CWND " << _cwnd << " rts " << _rts << " at " << timeAsUs(eventlist().now())
          << endl;
+    printf("Flow size is %lu bytes\n", _flow_size);
     _highest_sent = 0;
     _last_acked = 0;
 
@@ -640,6 +642,15 @@ void NdpSrc::processAck(const NdpAck &ack) {
     simtime_picosec ts = ack.ts();
     int32_t path_id = ack.path_id();
 
+    if (ack.stop_sending_flowcut && flowcut_mode == 1) {
+        printf("Flowcut2 must send stop sending %d at %lu\n", from, GLOBAL_TIME / 1000);
+    }
+    if (ack.stop_sending_flowcut && !stop_sending && flowcut_mode == 1) {
+        printf("Flowcut must send stop sending %d at %lu\n", from, GLOBAL_TIME / 1000);
+        stop_sending = true;
+        drain_start = eventlist().now();
+    }
+
     /*
       if (pull)
       printf("Receive ACK (pull): %s\n", ack.pull_bitmap().to_string().c_str());
@@ -721,13 +732,13 @@ void NdpSrc::processAck(const NdpAck &ack) {
     _flight_size -= _mss;
 
     if ("flowcut" == custom_routing) {
-        if (exp_avg_rtt_flowcut > _base_rtt * flowcut_rtt_ratio && !stop_sending) {
+        if (exp_avg_rtt_flowcut > _base_rtt * flowcut_rtt_ratio && !stop_sending && flowcut_mode == 0) {
             stop_sending = true;
             drain_start = eventlist().now();
-            /*  printf("Stop Sending %d at %lu\n", from, GLOBAL_TIME / 1000); */
+            printf("Stop Sending %d at %lu --  Avg RTT %f %base %lu vs %f\n", from, GLOBAL_TIME / 1000, exp_avg_rtt_flowcut/1000, _base_rtt/1000, _base_rtt * flowcut_rtt_ratio/1000);
         }
         if (_flight_size == 0 && stop_sending) {
-            /* printf("Start Sending %d at %lu\n", from, GLOBAL_TIME / 1000); */
+            printf("Start Sending %d at %lu\n", from, GLOBAL_TIME / 1000);
             stop_sending = false;
             first_flowcut = true;
             pull = true;
@@ -757,6 +768,8 @@ void NdpSrc::processAck(const NdpAck &ack) {
 
         printf("Overall Completion at %lu\n", GLOBAL_TIME);
 
+        printf("Total Time Spend Draining %d %lu of %lu -- %f \n", from, total_drain_time / 1000, GLOBAL_TIME / 1000, total_drain_time/(double)GLOBAL_TIME*100);
+
         if (_end_trigger) {
             _end_trigger->activate();
         }
@@ -766,6 +779,9 @@ void NdpSrc::processAck(const NdpAck &ack) {
     update_rtx_time();
 
     /* if the PULL bit is set, send some new data packets */
+
+    printf("Received ACK for %s -- Flight Size %d -- Time %lu -- Pull %d -- STOP %d %d\n", _name.c_str(), _flight_size,
+           eventlist().now() / 1000, pull, ack.stop_sending_flowcut, stop_sending);
     if (pull) {
         _implicit_pulls++;
         pull_packets(pullno, pacerno);
@@ -805,6 +821,8 @@ void NdpSrc::receivePacket(Packet &pkt) {
     }
 
     received_once = true;
+
+    printf("Flow %s -- Flight Size %d -- Timer %lu\n", _name.c_str(), _flight_size, eventlist().now() / 1000);
 
     switch (pkt.type()) {
     case NDP: {
@@ -866,6 +884,12 @@ void NdpSrc::receivePacket(Packet &pkt) {
         _acks_received++;
         _pull_window++;
         _first_window_count--;
+
+        if (_flight_size == 0) {
+            pkt.stop_sending_flowcut = false;
+
+        }
+
         processAck((const NdpAck &)pkt);
         pkt.free();
         return;
@@ -944,9 +968,9 @@ int NdpSrc::choose_route() {
             } else if (first_flowcut) {
                 _crt_path = (random() * 1) % _paths.size();
                 last_flowlet_choice = _crt_path;
-                /* printf("Choosing new Flowcut %d at %lu - RTT Exp Avg %f vs %f -- Alpha %f\n", from,
+                printf("Choosing new Flowcut %d at %lu - RTT Exp Avg %f vs %f -- Alpha %f --> %d\n", from,
                        eventlist().now() / 1000, exp_avg_rtt_flowcut / 1000, flowcut_rtt_ratio * _base_rtt / 1000,
-                       exp_avg_alpha); */
+                       exp_avg_alpha, last_flowlet_choice); 
                 first_flowcut = false;
             } else {
                 _crt_path = last_flowlet_choice;
@@ -1058,14 +1082,17 @@ void NdpSrc::pull_packets(NdpPull::seq_t pull_no, NdpPull::seq_t pacer_no) {
     // pull that gets there faster on another path can supercede it
     // cout << "Last pull " << _last_pull << " pull no " << pull_no << " max
     // pull " << _max_pull << endl;
+    printf("Pull1 %d\n", stop_sending);
     if (pull_no > _max_pull)
         _max_pull = pull_no;
 
     if (stop_sending) {
         return;
     }
+    printf("Pull2\n");
 
     while (_last_pull < _max_pull) {
+        printf("Pull3\n");
         int sent = send_packet(pacer_no);
         // cout << "Sending packet out, sent=" << sent << " last=" << _last_pull
         // << " max=" << _max_pull << endl;
@@ -1092,8 +1119,9 @@ int NdpSrc::send_packet(NdpPull::seq_t pacer_no) {
 
         p->from = this->from;
         p->to = this->to;
-        p->tag = this->tag;
+        p->tag = 0;
         p->hop_count = 0;
+        p->previous_switch_name = _name;
 
         switch (_route_strategy) {
         case SINGLE_PATH:
@@ -1107,13 +1135,13 @@ int NdpSrc::send_packet(NdpPull::seq_t pacer_no) {
             p->set_route(*_route);
             int crt = choose_route();
             p->set_pathid(_path_ids[crt]);
-            /* printf("From %d %d - Sending PAth %d\n", from, p->id(), crt); */
-            /*
-            if (_log_me) {
+            printf("From %d %d - Sending Path %d\n", from, _path_ids[crt], crt);
+            
+            /* if (_log_me) {
                 cout << eventlist().now() << " sending_rtx " << _path_ids[crt]
             << endl;
-            }
-            */
+            } */
+            
             break;
         }
         default:
@@ -1124,6 +1152,7 @@ int NdpSrc::send_packet(NdpPull::seq_t pacer_no) {
 #endif
         }
         PacketSink *sink = p->sendOn();
+
         last_pkt_send_time = eventlist().now();
         packets_sent++;
         HostQueue *q = dynamic_cast<HostQueue *>(sink);
@@ -1185,7 +1214,13 @@ int NdpSrc::send_packet(NdpPull::seq_t pacer_no) {
             // crt = random() % _paths.size();
             p->hop_count = 0;
 
-            p->set_pathid(_path_ids[crt]);
+            if (_path_ids[crt] == 169) {
+                p->set_pathid(_path_ids[crt] + 3);
+                printf("From %d %d - Sending Path1 %d\n", from, _path_ids[crt] + 3, crt);
+            } else {
+                p->set_pathid(_path_ids[crt]);
+                printf("From %d %d - Sending Path2 %d\n", from, _path_ids[crt], crt);
+            }
             /* printf("From %d %d - Sending PAth %d\n", from, p->id(), crt); */
             /*
             if (_log_me) {
@@ -1215,14 +1250,17 @@ int NdpSrc::send_packet(NdpPull::seq_t pacer_no) {
         << endl;
         }
         */
+       cout << "Sent " << _highest_sent+1 << " Flight Size: " << _flight_size
+        << endl;
         _highest_sent += _mss; // XX beware wrapping
         _packets_sent++;
         _new_packets_sent++;
 
         p->from = this->from;
         p->to = this->to;
-        p->tag = this->tag;
+        p->tag = 0;
         p->hop_count = 0;
+        p->previous_switch_name = _name;
 
         PacketSink *sink = p->sendOn();
         last_pkt_send_time = eventlist().now();
@@ -1359,6 +1397,7 @@ void NdpSrc::retransmit_packet() {
 #ifdef DEBUG_PATH_STATS
         _path_counts_rto[p->path_id()]++;
 #endif
+        p->previous_switch_name = _name;
         p->sendOn();
         last_pkt_send_time = eventlist().now();
         _packets_sent++;
@@ -1676,6 +1715,7 @@ void NdpSink::receiver_increase(NdpPacket *p) {
             pull_pkt = NdpPull::newpkt(p->flow(), *(_paths[random() % _paths.size()]), _cumulative_ack, ++_pull_no,
                                        _srcaddr);
 
+        pull_pkt->is_pull = true;
         _pacer->enqueue_pull(pull_pkt, this);
         _parked_increase = _pacer->pacer_no();
     }
@@ -1730,6 +1770,12 @@ void NdpSink::receivePacket(Packet &pkt) {
 
     simtime_picosec ts = p->ts();
     bool last_packet = ((NdpPacket *)&pkt)->last_packet();
+
+
+    if (_src->flowcut_mode > 0) {
+        ts = p->sent_alternative;
+    }
+    printf("Received Data sent at %lu - %lu\n", (ts), pkt.sent_alternative);
 
     update_path_history(*p);
 
@@ -1892,6 +1938,7 @@ void NdpSink::process_request_to_send(NdpRTS *pkt) {
         }
 
         NdpPull *pull_pkt = NdpPull::newpkt(pkt, *r, _cumulative_ack, _pull_no, _srcaddr);
+        pull_pkt->is_pull = true;
         _pacer->enqueue_pull(pull_pkt, this);
     }
 
@@ -1999,6 +2046,10 @@ void NdpSink::send_ack(simtime_picosec ts, bool marked, NdpPacket::seq_t ackno, 
     ack->from = _from;
     ack->to = _to;
     ack->tag = _tag;
+    ack->is_ack = true;
+    ack->sent_alternative = ts;
+    printf("Sending ACK, from %d, to %d, tag %d, pathid_echo %d\n", ack->from, ack->to, ack->tag,
+           ack->pathid_echo);
 
     if (enqueue_pull)
         _pacer->sendPacket(ack, pacer_no, this);
@@ -2200,6 +2251,7 @@ void NdpPullPacer::sendPacket(Packet *ack, NdpPacket::seq_t rcvd_pacer_no, NdpSi
             set_pacerno(ack, _pacer_no++);
             // printf("Ack Path ID %d and %d\n", ack->pathid(),
             // ack->pathid_echo); fflush(stdout);
+            ack->is_pull = true;
             ack->sendOn();
             _last_pull = eventlist().now();
             return;
@@ -2238,6 +2290,7 @@ void NdpPullPacer::sendPacket(Packet *ack, NdpPacket::seq_t rcvd_pacer_no, NdpSi
     ack->flow().logTraffic(*ack, *this, TrafficLogger::PKT_SEND);
     // cout << "Sending Plain ACK with pullno " <<  ((NdpAck*)ack)->pullno() <<
     // endl;
+    ack->is_pull = true;
     ack->sendOn();
 
     //   if (_log_me) {
@@ -2317,6 +2370,7 @@ void NdpPullPacer::doNextEvent() {
         }
     }
     set_pacerno(pkt, _pacer_no++);
+    pkt->is_pull = true; // this is a pull packet, so set the flag
     pkt->sendOn();
 
     /*
@@ -2390,6 +2444,7 @@ void NdpRTSPacer::doNextEvent() {
         return;
     }
     Packet *pkt = _rts_queue.dequeue();
+    pkt->is_pull = true; // this is a pull packet, so set the flag
     pkt->sendOn();
 
     // cout << "RTS Pacer sending PULL at "<<timeAsUs(eventlist().now())<<endl;

@@ -116,6 +116,9 @@ class NdpSrc : public PacketSink, public EventSource, public TriggerTarget {
     int count_nack_num = 0;
     bool received_once = false;
 
+    simtime_picosec _total_time_in_drain = 0;
+    simtime_picosec _last_drain_start_time = 0;
+
     // the following are used with SCATTER_PERMUTE, SCATTER_RANDOM and
     // PULL_BASED route strategies
     uint16_t _crt_path;
@@ -188,6 +191,9 @@ class NdpSrc : public PacketSink, public EventSource, public TriggerTarget {
     bool first_flowcut = false;
     simtime_picosec total_drain_time = 0;
     simtime_picosec drain_start = 0;
+
+    static int flowcut_mode; // 0 = no flowcut, 1 = flowcut, 2 = flowcut with
+                             // stop sending
 
     int choose_route();
     int next_route();

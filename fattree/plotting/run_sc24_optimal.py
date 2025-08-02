@@ -148,5 +148,5 @@ plt.tight_layout()
 
 Path("plots/png").mkdir(parents=True, exist_ok=True)
 Path("plots/pdf").mkdir(parents=True, exist_ok=True)
-plt.savefig(Path("plots/png") / (str("optimal") + ""))
-plt.savefig(Path("plots/pdf") / (str("optimal") + "" + ".pdf"))
+plt.savefig(Path("plots/png") / (str("optimal2") + ""))
+plt.savefig(Path("plots/pdf") / (str("optimal2") + "" + ".pdf"))

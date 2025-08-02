@@ -9,6 +9,7 @@
 #include "routetable.h"
 
 int FatTreeInterDCSwitch::precision_ts = 1;
+int FatTreeInterDCSwitch::flowcut_ratio = 3; // Default flowcut ratio
 
 FatTreeInterDCSwitch::FatTreeInterDCSwitch(EventList &eventlist, string s, switch_type t, uint32_t id,
                                            simtime_picosec delay, FatTreeInterDCTopology *ft, int dc)
@@ -23,6 +24,66 @@ FatTreeInterDCSwitch::FatTreeInterDCSwitch(EventList &eventlist, string s, switc
     _last_choice = eventlist.now();
     _fib = new RouteTable();
     dc_id = dc;
+}
+
+void FatTreeInterDCSwitch::increaseFlowInFlight(const std::string& key, int port, std::string source_name, int increase_size)
+{
+    auto it = _flowcut_table.find(key);
+
+    if (it == _flowcut_table.end()) {
+        _flowcut_table.emplace(key, FlowInfo{increase_size, port, source_name});
+    } else {
+        // --- existing flow → bump -------------------------------
+        it->second.in_flight_bytes += increase_size;
+
+        // --- if counter is now zero → erase ----------------------
+        if (it->second.in_flight_bytes == 0)
+            _flowcut_table.erase(it);
+    }
+}
+
+void FatTreeInterDCSwitch::decreaseFlowInFlight(const std::string& key, int port, std::string source_name, int decrease_size, simtime_picosec ts)
+{
+    auto it = _flowcut_table.find(key);
+
+
+    if (it == _flowcut_table.end()) {
+        _flowcut_table.emplace(key, FlowInfo{decrease_size, port, source_name});
+        assert(false); 
+        // should never happen
+    } else {
+
+        //checkRTTFlowcut(ts);
+        // --- existing flow → bump -------------------------------
+        it->second.in_flight_bytes -= decrease_size;
+
+        // --- if counter is now zero → erase ----------------------
+        if (it->second.in_flight_bytes <= 0)
+            _flowcut_table.erase(it);
+    }
+}
+
+bool FatTreeInterDCSwitch::checkRTTFlowcut(simtime_picosec ts, simtime_picosec base_rtt) {
+    if (eventlist().now() - ts > base_rtt * flowcut_ratio) {
+        return true;
+    }
+    return false;
+}
+
+string FatTreeInterDCSwitch::getPreviousName(const std::string& key) {
+    auto it = _flowcut_table.find(key);
+
+    if (it == _flowcut_table.end()) {
+        //printf("Not found in flowcut table: %s in %s\n", key.c_str(), _name.c_str());
+        assert(false);   
+        return ""; // Return an empty string if not found
+    } else {
+        ///printf("Found in flowcut table: %s in %s\n", key.c_str(), _name.c_str());
+        //printf("Source Name: %s\n", it->second.source_name.c_str());
+    }
+
+    return it->second.source_name;
+
 }
 
 void FatTreeInterDCSwitch::receivePacket(Packet &pkt) {
@@ -45,7 +106,7 @@ void FatTreeInterDCSwitch::receivePacket(Packet &pkt) {
     }
 
     /*  */
-    pkt.previous_switch_id = _id;
+    
 
     /* if (nodename() == "Switch_LowerPod_7" && pkt.size() > 100) {
         printf("Node %s - Pkt %d %d - Packet Received at %lu\n", nodename().c_str(), pkt.from, pkt.id(),
@@ -74,10 +135,36 @@ void FatTreeInterDCSwitch::receivePacket(Packet &pkt) {
         // cout << "Switch type " << _type <<  " id " << _id << " pkt dst " <<
         // pkt.dst() << " dir " << pkt.get_direction() << endl;
 
+        if (!pkt.is_ack && !pkt._is_trim && !pkt.is_pull && pkt.hop_count == 0) {
+            pkt.set_ts(eventlist().now());
+            pkt.sent_alternative = eventlist().now();
+        }
+
         pkt.hop_count++;
 
         // printf("From %d - At %s - Hop %d - Time %lu - Typr %d\n", pkt.from,
         //        nodename().c_str(), pkt.hop_count, GLOBAL_TIME, pkt.type());
+
+
+        
+
+        printf("Switch Hop %s - Packet Received at %lu - Size %d\n", nodename().c_str(), GLOBAL_TIME / 1000, pkt.size());
+        std::string flowKey = std::to_string(pkt.from) + "_" + std::to_string(pkt.to) + "_" + std::to_string(pkt.tag);
+        if (!pkt.is_ack && !pkt._is_trim && !pkt.is_pull) {
+            //printf("Packet Type %d %d %d\n", pkt.is_ack, pkt._is_trim, pkt.is_pull);
+            increaseFlowInFlight(flowKey, pkt.previous_switch_id, pkt.previous_switch_name, pkt.size());
+            printfInfoFlowcutTable(true, pkt);
+        } else if (pkt.is_ack) {
+            //printf("Packet Type %d %d %d\n", pkt.is_ack, pkt._is_trim, pkt.is_pull);
+            //printfInfoFlowcutTable(false, pkt);
+            
+            //printf("RTT for packet %d is %lu\n",
+            decreaseFlowInFlight(flowKey, pkt.previous_switch_id, pkt.previous_switch_name, 4096+64, pkt.ts());
+            printfInfoFlowcutTable(false, pkt);
+        }
+
+        pkt.previous_switch_id = _id;
+        pkt.previous_switch_name = _name;
 
         if ((pkt.hop_count == 1 && pkt.size() > 100) &&
             (pkt.type() == UEC || pkt.type() == NDP || pkt.type() == SWIFTTRIMMING || pkt.type() == UEC_DROP ||
@@ -91,7 +178,7 @@ void FatTreeInterDCSwitch::receivePacket(Packet &pkt) {
                         (GLOBAL_TIME - (4160 * 8 / LINK_SPEED_MODERN * 1000) - (LINK_DELAY_MODERN * 1000));
             }
 
-            pkt.set_ts(my_time);
+            //pkt.set_ts(my_time);
 
             if (COLLECT_DATA) {
                 // Sent
@@ -329,6 +416,7 @@ Route *FatTreeInterDCSwitch::getNextHop(Packet &pkt, BaseQueue *ingress_port) {
     } */
     vector<FibEntry *> *available_hops = _fib->getRoutes(pkt.dst());
 
+    //printf("GetNextHop1 %s\n", nodename().c_str());
     if (available_hops) {
         // implement a form of ECMP hashing; might need to revisit based on
         // measured performance.
@@ -418,26 +506,32 @@ Route *FatTreeInterDCSwitch::getNextHop(Packet &pkt, BaseQueue *ingress_port) {
             ecmp_choice = pkt.from;
         }
 
+
+        //printf("GetNextHop2 %s\n", nodename().c_str());
+        if (pkt.is_ack) {
+            for (int i = 0; i< available_hops->size(); i++){
+                Route * r1= available_hops->at(i)->getEgressPort();
+                BaseQueue* q1 = dynamic_cast<BaseQueue*>(r1->at(0));
+                string switch_considered = q1->getRemoteEndpoint()->nodename();
+                string flow_key = std::to_string(pkt.from) + "_" + std::to_string(pkt.to) + "_" + std::to_string(pkt.tag);
+                printf("Switch %s - %s is considering flow %s - Previous %s\n", _name.c_str(), switch_considered.c_str(), flow_key.c_str(), getPreviousName(flow_key).c_str());
+                if (switch_considered == getPreviousName(flow_key)) {
+                    FibEntry *e = (*available_hops)[i];
+                    pkt.set_direction(e->getDirection());
+                    //printf("------ %s  ------\n", e->getEgressPort()->at(0)->nodename().c_str());
+                    return e->getEgressPort();
+                }
+            }
+        } else {
+
+        }
+
         FibEntry *e = (*available_hops)[ecmp_choice];
-
-        /*printf("Here2 %d %d@%d - Time %lu - Hops Size %d - IdxID %d - Inc ID "
-               "%d - "
-               "Direction"
-               "%d - EgressPort %d - ECMP Choice %d -"
-               "MyId "
-               "%d %s\n",
-               pkt.size(), pkt.from, pkt.dst(), GLOBAL_TIME / 1000,
-               available_hops->size(), pkt.my_idx, pkt.inc_id,
-               e->getDirection(), e->getEgressPort()->path_id(), ecmp_choice,
-               id, nodename().c_str());
-        printf("FROM %d / CHOICE %d / HOPS %d \n", pkt.from, ecmp_choice,
-               available_hops->size());
-        fflush(stdout);*/
         pkt.set_direction(e->getDirection());
-
         return e->getEgressPort();
     }
 
+    //printf("GetNextHop3 %s\n", nodename().c_str());
     // no route table entries for this destination. Add them to FIB or fail.
     if (_type == TOR) {
         if (_ft->HOST_POD_SWITCH(pkt.dst() % _ft->no_of_nodes()) == _id && dc_id == _ft->get_dc_id(pkt.dst())) {
@@ -448,6 +542,37 @@ Route *FatTreeInterDCSwitch::getNextHop(Packet &pkt, BaseQueue *ingress_port) {
             HostFibEntry *fe = _fib->getHostRoute(pkt.dst() % _ft->no_of_nodes(), pkt.flow_id());
             assert(fe);
             pkt.set_direction(DOWN);
+
+
+            // use the RTT to update the base_rtt if the RTT is less than the current base_rtt for this key entry
+            // Use the _base_rtt_table hashamp
+            if (pkt.is_ack) {
+                std::string flowKey = std::to_string(pkt.from) + "_" + std::to_string(pkt.to) + "_" + std::to_string(pkt.tag);
+                auto it = _base_rtt_table.find(flowKey);
+                simtime_picosec base = 0;
+                if (it == _base_rtt_table.end()) {
+                    _base_rtt_table.emplace(flowKey, eventlist().now() - pkt.sent_alternative);
+                    base = eventlist().now() - pkt.sent_alternative;
+                } else {
+                    if (eventlist().now() - pkt.sent_alternative < it->second) {
+                        it->second = eventlist().now() - pkt.sent_alternative;
+                        base = it->second;
+                    } else {
+                        base = it->second;
+                    }
+                }
+
+                bool is_above_flowcut = checkRTTFlowcut(pkt.sent_alternative, base);
+                printf("RTT (%lu) for switch %s is %lu Base %lu -- Is above %d\n", pkt.sent_alternative, nodename().c_str(), eventlist().now() - pkt.sent_alternative, base, is_above_flowcut);
+
+                if (is_above_flowcut) {
+                    pkt.stop_sending_flowcut = true;
+                    printf("Sending Pause %d at %lu\n", pkt.from, GLOBAL_TIME / 1000);
+                } else {
+                    pkt.stop_sending_flowcut = false;
+                }
+            }
+            
             return fe->getEgressPort();
         } else {
             // route packet up!
@@ -480,6 +605,7 @@ Route *FatTreeInterDCSwitch::getNextHop(Packet &pkt, BaseQueue *ingress_port) {
                         _fib->addRoute(pkt.dst(), r, 1, UP);
                     }
                 }
+                
                 _uproutes = _fib->getRoutes(pkt.dst());
                 permute_paths(_uproutes);
             }

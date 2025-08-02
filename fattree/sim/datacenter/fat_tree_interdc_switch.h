@@ -90,6 +90,14 @@ class FlowletInfoInterDC {
     };
 };
 
+struct FlowInfo
+{
+    int in_flight_bytes   = 0;   // outstanding packets/bytes/… in flight
+    int source_port = 0;   // TCP/UDP source port
+    std::string source_name;
+};
+
+
 class FatTreeInterDCSwitch : public Switch {
   public:
     enum switch_type { NONE = 0, TOR = 1, AGG = 2, CORE = 3, BORDER = 4 };
@@ -144,6 +152,7 @@ class FatTreeInterDCSwitch : public Switch {
     static simtime_picosec _sticky_delta;
     static double _ecn_threshold_fraction;
     static int precision_ts;
+    static int flowcut_ratio;
 
   private:
     switch_type _type;
@@ -162,6 +171,25 @@ class FatTreeInterDCSwitch : public Switch {
     simtime_picosec _last_choice;
 
     unordered_map<Packet *, bool> _packets;
+
+    std::unordered_map<std::string, FlowInfo> _flowcut_table;
+    std::unordered_map<std::string, simtime_picosec> _base_rtt_table;
+    string getPreviousName(const std::string& key);
+    void increaseFlowInFlight(const std::string& key, int port, std::string source_name, int increase_size);
+    void decreaseFlowInFlight(const std::string& key, int port, std::string source_name, int decrease_size, simtime_picosec ts);
+    bool checkRTTFlowcut(simtime_picosec ts, simtime_picosec base_rtt);
+    void printfInfoFlowcutTable(bool is_increase, const Packet &pkt) {
+        // Print the flowcut table for debugging purposes
+        // This is useful to see how the flowcut table changes
+        // when packets are sent or acknowledged.
+
+        // Print the action taken (increase/decrease) and the current state of the table
+      std::string action = is_increase ? "increased" : "decreased";
+        //printf("I am Switch %s - Previous Hop %d vs Current %d (%s vs %s) - Flowcut Table (%d) :\n", _name.c_str(), pkt.previous_switch_id, _id, pkt.previous_switch_name.c_str(), _name.c_str(), _flowcut_table.size());
+        for (const auto& [key, info] : _flowcut_table) {
+            //printf("Flow %s: in_flight_bytes=%d, source_port=%d, action=%s\n", key.c_str(), info.in_flight_bytes, info.source_port, action.c_str());
+        }
+    }
 };
 
 #endif

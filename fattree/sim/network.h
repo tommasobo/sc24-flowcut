@@ -262,6 +262,7 @@ class Packet {
 
     // logsim extensions
     bool is_ack = false;
+    bool is_pull = false; // used for NDP pull packets
     int pathid_echo = 0;
     int pathid_sender = 0;
     uint32_t from = -1;
@@ -279,6 +280,10 @@ class Packet {
     bool is_failed = false;
     bool is_bts_pkt = false;
     int previous_switch_id = 0;
+    bool stop_sending_flowcut = false;
+    simtime_picosec base_rtt = 0;
+    string previous_switch_name = "empty";
+    simtime_picosec sent_alternative = 0; // used to store the time when the packet was sent on an alternative path
 
   protected:
     virtual void set_route(PacketFlow &flow, const Route &route, int pkt_size, packetid_t id);

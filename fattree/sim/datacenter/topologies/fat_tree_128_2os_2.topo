@@ -8,21 +8,21 @@ Oversubscribed 1
 Downlink_speed_Gbps 200
 Radix_Down 4
 Radix_Up 4
-Downlink_Latency_ns 1000
+Downlink_Latency_ns 200
 Switch_Latency_ns 0
 
 Tier 1
-Oversubscribed 1
+Oversubscribed 2
 Downlink_speed_Gbps 200
 Radix_Down 4
-Radix_Up 4
-Downlink_Latency_ns 1000
+Radix_Up 2
+Downlink_Latency_ns 200
 Switch_Latency_ns 0
 Bundle 1
 
 Tier 2
 Downlink_speed_Gbps 200
 Radix_Down 8
-Downlink_Latency_ns 1000
+Downlink_Latency_ns 200
 Switch_Latency_ns 0
 Bundle 1

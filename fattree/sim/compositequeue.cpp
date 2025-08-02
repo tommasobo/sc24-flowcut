@@ -322,7 +322,11 @@ void CompositeQueue::receivePacket(Packet &pkt) {
                GLOBAL_TIME / 1000); */
 
     } else if (!pkt.header_only()) {
-        //  Queue
+
+
+        printf("Queue %s -- Size %d -- Time %lu -- Max Queue %d -- PKT %d\n", _nodename.c_str(), _queuesize_low   ,
+               GLOBAL_TIME / 1000, _maxsize, pkt.pathid());
+        //  Queu
         /* printf("Remote is %s vs %s %d %d - Switch ID - %d %d\n", this->getRemoteEndpoint()->nodename().c_str(),
                getSwitch()->nodename().c_str(), this->getRemoteEndpoint()->dc_id,
                ((Switch *)getRemoteEndpoint())->getID(), pkt.previous_switch_id, getSwitch()->getID()); */

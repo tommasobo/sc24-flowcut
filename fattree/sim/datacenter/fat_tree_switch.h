@@ -101,6 +101,7 @@ class FlowletInfo {
     };
 };
 
+
 class FatTreeSwitch : public Switch {
   public:
     enum switch_type { NONE = 0, TOR = 1, AGG = 2, CORE = 3 };
@@ -182,6 +183,7 @@ class FatTreeSwitch : public Switch {
     simtime_picosec _last_choice;
 
     unordered_map<Packet *, bool> _packets;
+
 };
 
 #endif

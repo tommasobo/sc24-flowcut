@@ -259,6 +259,9 @@ class FatTreeInterDCTopology : public Topology {
     static uint32_t _radix_up[2];
     static mem_b _queue_down[3];
     static mem_b _queue_up[2];
+
+
+    
 };
 
 #endif
